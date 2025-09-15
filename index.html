@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Góc Tâm Sự</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff3e0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #d84315;
+    }
+    .post-box, .reply-box {
+      background: #ffe0b2;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 8px;
+      resize: none;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 5px;
+      padding: 6px 12px;
+      background: #ff7043;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e64a19;
+    }
+    .post {
+      background: #ffe0b2;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+    .time {
+      font-size: 12px;
+      color: gray;
+      margin-top: 5px;
+    }
+    .replies {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+    .reply {
+      background: #fff8e1;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 5px;
+      position: relative;
+    }
+    .delete-btn {
+      background: #b71c1c;
+      color: white;
+      border: none;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+    .delete-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌸 Góc Tâm Sự 🌸</h1>
+  <div class="post-box">
+    <textarea id="postText" placeholder="Bạn muốn chia sẻ điều gì?"></textarea>
+    <button onclick="addPost()">Chia sẻ</button>
+  </div>
+  <div id="posts"></div>
+
+  <script>
+    let posts = JSON.parse(localStorage.getItem("posts") || "[]");
+
+    function savePosts() {
+      localStorage.setItem("posts", JSON.stringify(posts));
+    }
+
+    // Thêm bài chia sẻ mới
+    function addPost() {
+      const text = document.getElementById("postText").value.trim();
+      if (text === "") return;
+      const post = { text, time: new Date().toLocaleString(), replies: [] };
+      posts.unshift(post);
+      savePosts();
+      document.getElementById("postText").value = "";
+      renderPosts();
+    }
+
+    // Thêm bình luận cho bài chia sẻ
+    function addReply(postIndex) {
+      const replyInput = document.getElementById("replyText" + postIndex);
+      const text = replyInput.value.trim();
+      if (text === "") return;
+      posts[postIndex].replies.push({ text, time: new Date().toLocaleString() });
+      savePosts();
+      replyInput.value = "";
+      renderPosts();
+    }
+
+    // Xóa bình luận
+    function deleteReply(postIndex, replyIndex) {
+      if (confirm("Bạn có chắc muốn xóa bình luận này không?")) {
+        posts[postIndex].replies.splice(replyIndex, 1);
+        savePosts();
+        renderPosts();
+      }
+    }
+
+    // Xóa bài chia sẻ
+    function deletePost(postIndex) {
+      if (confirm("Bạn có chắc muốn xóa bài chia sẻ này không?")) {
+        posts.splice(postIndex, 1);
+        savePosts();
+        renderPosts();
+      }
+    }
+
+    // Hiển thị lại tất cả bài và bình luận
+    function renderPosts() {
+      const postsDiv = document.getElementById("posts");
+      postsDiv.innerHTML = "";
+      posts.forEach((p, i) => {
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <p><b>${p.text}</b></p>
+          <div class="time">${p.time}</div>
+          <button class="delete-btn" onclick="deletePost(${i})">Xóa bài</button>
+          <div class="replies">
+            ${p.replies.map((r, j) => `
+              <div class="reply">
+                <p>${r.text}</p>
+                <div class="time">${r.time}</div>
+                <button class="delete-btn" onclick="deleteReply(${i}, ${j})">Xóa</button>
+              </div>
+            `).join("")}
+            <div class="reply-box">
+              <textarea id="replyText${i}" placeholder="Viết bình luận..."></textarea>
+              <button onclick="addReply(${i})">Trả lời</button>
+            </div>
+          </div>
+        `;
+        postsDiv.appendChild(div);
+      });
+    }
+
+    renderPosts();
+  </script>
+</body>
+</html>>
